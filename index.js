@@ -1,6 +1,8 @@
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
+const slugify = require("slugify");
+const replaceTemplate = require("./use/1-node-farm/modules/replaceTemplate");
 // file start
 // // //synchrnous way
 // // const textIn = fs.readFileSync(
@@ -42,20 +44,6 @@ const url = require("url");
 // file end //
 
 //server
-const replaceTemplate = (temp, product) => {
-  let output = temp.replace(/{%Product-name%}/g, product.productName);
-  output = output.replace(/{%image%}/g, product.image);
-  output = output.replace(/{%price%}/g, product.price);
-  output = output.replace(/{%from%}/g, product.from);
-  output = output.replace(/{%nutrients%}/g, product.nutrients);
-  output = output.replace(/{%quantity%}/g, product.quantity);
-  output = output.replace(/{%description%}/g, product.description);
-  output = output.replace(/{%id%}/g, product.id);
-
-  if (!product.organic)
-    output = output.replace(/{%Not-organic%}/g, "not-organic");
-  return output;
-};
 
 const tempOverview = fs.readFileSync(
   `${__dirname}/use/1-node-farm/starter/templates/template-overview.html`,
@@ -73,12 +61,15 @@ const data = fs.readFileSync(
   `${__dirname}/use/1-node-farm/final/dev-data/data.json`,
   "utf-8"
 );
+
 const dataObj = JSON.parse(data);
+const slugs = dataObj.map((el) => slugify(el.productName), { lower: true });
+console.log(slugs);
+console.log(slugify("fresh-avacados", { lower: true }));
 
 const server = http.createServer((req, res) => {
   const { query, pathname } = url.parse(req.url, true);
 
-  
   //overview-page
 
   if (pathname === "/" || pathname === "/overview") {
