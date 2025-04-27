@@ -12,34 +12,64 @@ const readFilePro = (file) => {
 
 const writeFilePro = (file, data) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(file,  data,(err) => {
+    fs.writeFile(file, data, (err) => {
       if (err) reject('error');
       resolve('success');
     });
   });
 };
 
-const GetDog = async()=>{
-    try{
-   const data= await readFilePro(`${__dirname}/dog.txt`)
-   console.log(`breed: ${data}`);
+const GetDog = async () => {
+  try {
+    const data = await readFilePro(`${__dirname}/dog.txt`);
+    console.log(`breed: ${data}`);
 
-   const res = await sp.get(
-    `https://dog.ceo/api/breed/${data}/images/random`
-  );
-  console.log(res.body.message);
-  await writeFilePro('dog_image.txt', res.body.message);
-  console.log("saved");
-}catch(err) {
+    const res1Pro = sp.get(
+      `https://dog.ceo/api/breed/${data}/images/random`
+    );
+    const res2Pro = sp.get(
+      `https://dog.ceo/api/breed/${data}/images/random`
+    );
+    const res3Pro = sp.get(
+      `https://dog.ceo/api/breed/${data}/images/random`
+    );
+
+    const all = await Promise.all([res1Pro, res2Pro, res3Pro]);
+    
+    const imgs = all.map((el) => el.body.message);
+    console.log(imgs);
+
+    
+    await writeFilePro('dog_image.txt',imgs.join('\n'));
+    console.log('saved');
+  } catch (err) {
     console.log(err.message);
+    throw err;
   }
-}
-GetDog();
+  return '2.ready';
+};
+(async () => {
+  try {
+    console.log('1.get');
+    const x = await GetDog();
+    console.log(x);
+    console.log('3.done');
+  } catch (err) {
+    console.log('err');
+  }
+})();
 
+/*
+console.log("1.get")
+GetDog().then(x=>{
 
-
-
-
+    console.log(x)
+    console.log("3.done")
+})
+.catch((err) => {
+    console.log("er");
+  });
+*/
 /*
 readFilePro(`${__dirname}/dog.txt`)
   .then((data) => {
